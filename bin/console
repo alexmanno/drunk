@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../src/Core/autoload.php';
+
+use AlexManno\Drunk\Core\Services\CommandsDiscovery;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+
+(function () {
+    $kernel = new \AlexManno\Drunk\Core\Kernel();
+    $kernel->boot();
+
+    $container = $kernel->getContainer();
+
+    $application = $container->get(Application::class);
+
+    $commands = $container->get(CommandsDiscovery::class)->getCommands();
+
+    $application->addCommands(array_map(function (string $command) use ($container): Command {
+        return $container->get($command);
+    }, $commands));
+
+    $application->run();
+})();

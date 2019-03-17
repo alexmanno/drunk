@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  php:
+    image: webdevops/php-nginx:alpine
+    environment:
+      WEB_DOCUMENT_ROOT: /app/public
+      WEB_DOCUMENT_INDEX: app.php
+    links:
+      - db
+    volumes:
+      - ./:/app
+    ports:
+      - 8080:80
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: drunk
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
