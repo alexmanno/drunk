@@ -4,35 +4,34 @@ declare(strict_types=1);
 
 namespace AlexManno\Drunk\Commands;
 
+use League\Flysystem\Filesystem;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
 
 class CacheClearCommand extends Command
 {
-    /** @var ContainerInterface */
-    private $container;
+    /** @var Filesystem */
+    private $filesystem;
 
     /**
      * CacheClearCommand constructor.
      *
      * @param ContainerInterface $container
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(Filesystem $filesystem)
     {
         parent::__construct('cache:clear');
 
-        $this->container = $container;
+        $this->filesystem = $filesystem;
     }
 
-
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): void
     {
-        $baseDir = $this->container->get('base_dir');
+        $this->filesystem->deleteDir('var/cache');
+        $this->filesystem->createDir('var/cache');
 
-        $process = new Process(['rm', '-rf', $baseDir.'/var/cache/*']);
+        $output->writeln('Cache clean');
     }
-
 }
