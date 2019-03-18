@@ -24,7 +24,7 @@ class RoutesProvider
      *
      * @throws \ReflectionException
      */
-    public function __invoke(\FastRoute\RouteCollector $r)
+    public function __invoke(\FastRoute\RouteCollector $r): void
     {
         $routes = $this->discovery->getRoutes();
         foreach ($routes as $route) {

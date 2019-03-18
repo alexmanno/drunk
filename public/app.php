@@ -1,16 +1,17 @@
 <?php
 
+use AlexManno\Drunk\Core\Kernel;
+use Zend\Diactoros\ServerRequestFactory;
+use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
+
 require_once __DIR__ . '/../src/Core/autoload.php';
 
 (function () {
-    $kernel = new \AlexManno\Drunk\Core\Kernel();
-    $kernel->boot();
+    $kernel = Kernel::create()->boot();
 
-    $request = \Zend\Diactoros\ServerRequestFactory::fromGlobals();
+    $request = ServerRequestFactory::fromGlobals();
 
     $response = $kernel->handle($request);
 
-    $emitter = new \Zend\HttpHandlerRunner\Emitter\SapiEmitter();
-
-    return $emitter->emit($response);
+    return $kernel->getContainer()->get(EmitterInterface::class)->emit($response);
 })();

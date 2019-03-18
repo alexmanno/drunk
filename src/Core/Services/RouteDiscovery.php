@@ -58,7 +58,7 @@ class RouteDiscovery
     /**
      * @throws \ReflectionException
      */
-    private function discoverRoutes()
+    private function discoverRoutes(): void
     {
         $finder = new Finder();
         $finder->files()->in($this->directory);

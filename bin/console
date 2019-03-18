@@ -3,20 +3,13 @@
 
 require_once __DIR__ . '/../src/Core/autoload.php';
 
-use AlexManno\Drunk\Core\Services\CommandsDiscovery;
+use AlexManno\Drunk\Core\Kernel;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\HelperSet;
 
 (function () {
-    $kernel = new \AlexManno\Drunk\Core\Kernel();
-    $kernel->boot();
-
-    $container = $kernel->getContainer();
-
-    $application = $container->get(Application::class);
-    $application->setHelperSet($container->get(HelperSet::class));
-    $application->addCommands($container->get('commands'));
-
-    $application->run();
+    Kernel::create()
+        ->boot()
+        ->getContainer()
+        ->get(Application::class)
+        ->run();
 })();

@@ -26,9 +26,12 @@ use League\Flysystem\Filesystem;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\HelperSet;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
+use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
 
 class Kernel
 {
@@ -36,9 +39,19 @@ class Kernel
     private $container;
 
     /**
-     * @throws \Exception
+     * @return Kernel
      */
-    public function boot(): void
+    public static function create(): self
+    {
+        return new self();
+    }
+
+    /**
+     * @throws \Exception
+     *
+     * @return Kernel
+     */
+    public function boot(): self
     {
         $baseDir = dirname(__DIR__, 2);
 
@@ -56,6 +69,17 @@ class Kernel
             'db.password' => env('DATABASE_PASSWORD'),
             'db.dbname' => env('DATABASE_DBNAME'),
 
+            EmitterInterface::class => \DI\create(SapiEmitter::class),
+            Application::class => function (ContainerInterface $container): Application {
+                $application = new Application(
+                    'Drunk',
+                    '1.0'
+                );
+                $application->setHelperSet($container->get(HelperSet::class));
+                $application->addCommands($container->get('commands'));
+
+                return $application;
+            },
             RouteDiscovery::class => function (ContainerInterface $container): RouteDiscovery {
                 return new RouteDiscovery(
                     'AlexManno\\Drunk\\Controllers',
@@ -121,6 +145,8 @@ class Kernel
         $this->container = $containerBuilder->build();
 
         $this->container->set(Kernel::class, $this);
+
+        return $this;
     }
 
     /**

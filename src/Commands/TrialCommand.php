@@ -27,14 +27,12 @@ class TrialCommand extends Command
     }
 
     /**
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      *
      * @throws \ReflectionException
-     *
-     * @return int|null|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): void
     {
         print_r($this->discovery->getRoutes());
 
