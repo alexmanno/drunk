@@ -8,7 +8,10 @@ use AlexManno\Drunk\Core\Services\CommandsDiscovery;
 use AlexManno\Drunk\Core\Services\RouteDiscovery;
 use AlexManno\Drunk\Core\Services\RoutesProvider;
 use DI\ContainerBuilder;
+use function DI\env;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Console\Command\ClearCache\MetadataCommand;
 use Doctrine\ORM\Tools\Console\Command\ClearCache\ResultCommand;
@@ -16,6 +19,7 @@ use Doctrine\ORM\Tools\Console\Command\SchemaTool\CreateCommand;
 use Doctrine\ORM\Tools\Console\Command\SchemaTool\DropCommand;
 use Doctrine\ORM\Tools\Console\Command\SchemaTool\UpdateCommand;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Setup;
 use Dotenv\Dotenv;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
@@ -48,7 +52,7 @@ class Kernel
                 return new RouteDiscovery(
                     'AlexManno\\Drunk\\Controllers',
                     'Controllers',
-                    (string) $container->get('base_dir'),
+                    (string)$container->get('base_dir'),
                     $container->get(AnnotationReader::class)
                 );
             },
@@ -56,11 +60,20 @@ class Kernel
                 return new CommandsDiscovery(
                     'AlexManno\\Drunk\\Commands',
                     'Commands',
-                    (string) $container->get('base_dir')
+                    (string)$container->get('base_dir')
                 );
             },
             EntityManagerInterface::class => function (ContainerInterface $container): EntityManagerInterface {
-                return Doctrine::setUp();
+                return EntityManager::create(
+                    [
+                        'driver' => $container->get('db.driver'),
+                        'host' => $container->get('db.host'),
+                        'user' => $container->get('db.user'),
+                        'password' => $container->get('db.password'),
+                        'dbname' => $container->get('db.dbname'),
+                    ],
+                    $container->get(Configuration::class)
+                );
             },
             Filesystem::class => function (ContainerInterface $container): Filesystem {
                 $adapter = new Local($container->get('base_dir'));
@@ -70,15 +83,22 @@ class Kernel
             HelperSet::class => function (ContainerInterface $container): HelperSet {
                 return ConsoleRunner::createHelperSet($container->get(EntityManagerInterface::class));
             },
-            'doctrine_commands' => function (ContainerInterface $container): array {
-                return [
-                    MetadataCommand::class,
-                    ResultCommand::class,
-                    CreateCommand::class,
-                    UpdateCommand::class,
-                    DropCommand::class,
-                ];
+            Configuration::class => function (ContainerInterface $container): Configuration {
+                return Setup::createAnnotationMetadataConfiguration(
+                    [sprintf('%s/src', $container->get('base_dir'))],
+                    $container->get('env') ?? 'prod',
+                    null,
+                    null,
+                    false
+                );
             },
+            'doctrine_commands' => [
+                MetadataCommand::class,
+                ResultCommand::class,
+                CreateCommand::class,
+                UpdateCommand::class,
+                DropCommand::class,
+            ],
             'commands' => function (ContainerInterface $container): array {
                 return array_map(
                     function (string $command) use ($container): Command {
@@ -94,6 +114,14 @@ class Kernel
 
         $this->container = $containerBuilder->build();
         $this->container->set('base_dir', $baseDir);
+        $this->container->set('env', env('ENVIRONMENT', 'prod'));
+
+        $this->container->set('db.driver', env('DATABASE_DRIVER', 'pdo_mysql'));
+        $this->container->set('db.host', env('DATABASE_HOST', 'localhost'));
+        $this->container->set('db.user', env('DATABASE_USERNAME'));
+        $this->container->set('db.password', env('DATABASE_PASSWORD'));
+        $this->container->set('db.dbname', env('DATABASE_DBNAME'));
+
         $this->container->set(Kernel::class, $this);
     }
 
