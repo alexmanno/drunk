@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AlexManno\Drunk\Controllers;
 
 use AlexManno\Drunk\Core\Annotations\Route;
-use AlexManno\Drunk\Core\Services\Hasher;
 use AlexManno\Drunk\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -41,14 +40,8 @@ class UserController
     {
         $users = $this->entityManager->getRepository(User::class)->findAll();
 
-        return new JsonResponse(array_map(function(User $user): array {
-            return [
-                'id' => $user->getId(),
-                'username' => $user->getUsername(),
-                'firstName' => $user->getFirstMame(),
-                'lastName' => $user->getLastName(),
-                'email' => $user->getEmail()
-            ];
+        return new JsonResponse(array_map(function (User $user): array {
+            return $user->toArray();
         }, $users));
     }
 
@@ -68,7 +61,7 @@ class UserController
             'firstName' => 'required|min:2',
             'lastName' => 'required|min:2',
             'email' => 'required|email',
-            'password' => 'required|min:8'
+            'password' => 'required|min:8',
         ]);
 
         if ($validation->fails()) {

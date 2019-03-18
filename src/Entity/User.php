@@ -31,7 +31,7 @@ class User
      * @var string
      * @ORM\Column(type="string", length=150)
      */
-    private $firstMame;
+    private $firstName;
 
     /**
      * @var string
@@ -53,22 +53,22 @@ class User
 
     /**
      * User constructor.
-     *
      * @param string $username
-     * @param string $firstMame
+     * @param string $firstName
      * @param string $lastName
      * @param string $email
      * @param string $password
      */
     public function __construct(
         string $username,
-        string $firstMame,
+        string $firstName,
         string $lastName,
         string $email,
         string $password
-    ) {
+    )
+    {
         $this->username = $username;
-        $this->firstMame = $firstMame;
+        $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->email = $email;
         $this->password = Hasher::encrypt($password);
@@ -91,6 +91,20 @@ class User
     }
 
     /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'username' => $this->username,
+            'firstName' => $this->firstName,
+            'lastName' => $this->lastName,
+            'email' => $this->email,
+        ];
+    }
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -109,9 +123,9 @@ class User
     /**
      * @return string
      */
-    public function getFirstMame(): string
+    public function getFirstName(): string
     {
-        return $this->firstMame;
+        return $this->firstName;
     }
 
     /**
