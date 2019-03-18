@@ -21,15 +21,13 @@ use Doctrine\ORM\Tools\Console\Command\SchemaTool\UpdateCommand;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Setup;
 use Dotenv\Dotenv;
+use FastRoute\Dispatcher;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\HelperSet;
-use Zend\Diactoros\Response\JsonResponse;
 use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
 
@@ -37,6 +35,14 @@ class Kernel
 {
     /** @var ContainerInterface */
     private $container;
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getContainer(): ContainerInterface
+    {
+        return $this->container;
+    }
 
     /**
      * @return Kernel
@@ -70,6 +76,12 @@ class Kernel
             'db.dbname' => env('DATABASE_DBNAME'),
 
             EmitterInterface::class => \DI\create(SapiEmitter::class),
+            Dispatcher::class => function (ContainerInterface $container): Dispatcher {
+                return \FastRoute\cachedDispatcher($container->get(RoutesProvider::class), [
+                    'cacheFile' => $container->get('base_dir') . '/var/cache/routes.cache',
+                    'disableCache' => $container->get('env'),
+                ]);
+            },
             Application::class => function (ContainerInterface $container): Application {
                 $application = new Application(
                     'Drunk',
@@ -147,47 +159,5 @@ class Kernel
         $this->container->set(Kernel::class, $this);
 
         return $this;
-    }
-
-    /**
-     * @return ContainerInterface
-     */
-    public function getContainer(): ContainerInterface
-    {
-        return $this->container;
-    }
-
-    public function handle(ServerRequestInterface $request): ResponseInterface
-    {
-        $dispatcher = \FastRoute\cachedDispatcher($this->container->get(RoutesProvider::class), [
-            'cacheFile' => $this->container->get('base_dir') . '/var/cache/routes.cache',
-            'disableCache' => $this->container->get('env'),
-        ]);
-
-        $httpMethod = $request->getMethod();
-        $uri = $request->getUri();
-
-        $routeInfo = $dispatcher->dispatch($httpMethod, $uri->getPath());
-        switch ($routeInfo[0]) {
-            case \FastRoute\Dispatcher::NOT_FOUND:
-                return new JsonResponse(['error' => 'Not found.'], 404);
-                break;
-            case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-                //$allowedMethods = $routeInfo[1];
-
-                return new JsonResponse(['error' => 'Method not allowed.'], 405);
-                break;
-            case \FastRoute\Dispatcher::FOUND:
-                $handler = $routeInfo[1];
-                $vars = $routeInfo[2];
-
-                $controller = $this->container->get($handler[0]);
-
-                return $controller->{$handler[1]}($request, ...$vars);
-
-                break;
-        }
-
-        return new JsonResponse(['error' => 'Internal server error'], 500);
     }
 }

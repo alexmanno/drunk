@@ -1,17 +1,18 @@
 <?php
 
 use AlexManno\Drunk\Core\Kernel;
+use AlexManno\Drunk\Core\Services\RequestHandler;
 use Zend\Diactoros\ServerRequestFactory;
 use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 
 require_once __DIR__ . '/../src/Core/autoload.php';
 
 (function () {
-    $kernel = Kernel::create()->boot();
+    $container = Kernel::create()->boot()->getContainer();
 
     $request = ServerRequestFactory::fromGlobals();
 
-    $response = $kernel->handle($request);
+    $response = $container->get(RequestHandler::class)->handle($request);
 
-    return $kernel->getContainer()->get(EmitterInterface::class)->emit($response);
+    return $container->get(EmitterInterface::class)->emit($response);
 })();
