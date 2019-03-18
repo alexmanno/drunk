@@ -23,9 +23,11 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\HelperSet;
 use Zend\HttpHandlerRunner\Emitter\EmitterInterface;
 use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
+use function DI\create;
 
 return [
-    EmitterInterface::class => \DI\create(SapiEmitter::class),
+    EmitterInterface::class => create(SapiEmitter::class),
+
     Dispatcher::class => function (ContainerInterface $container): Dispatcher {
         return \FastRoute\cachedDispatcher($container->get(RoutesProvider::class), [
             'cacheFile' => $container->get('base_dir') . '/var/cache/routes.cache',
@@ -68,9 +70,11 @@ return [
         );
     },
     Filesystem::class => function (ContainerInterface $container): Filesystem {
-        $adapter = new Local($container->get('base_dir'));
-
-        return new Filesystem($adapter);
+        return new Filesystem(
+            new Local(
+                $container->get('base_dir')
+            )
+        );
     },
     HelperSet::class => function (ContainerInterface $container): HelperSet {
         return ConsoleRunner::createHelperSet($container->get(EntityManagerInterface::class));
