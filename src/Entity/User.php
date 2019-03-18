@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexManno\Drunk\Entity;
 
+use AlexManno\Drunk\Core\Annotations\Validations;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -14,6 +15,7 @@ class User
 {
     /**
      * @var int
+     *
      * @ORM\Id()
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -22,31 +24,51 @@ class User
 
     /**
      * @var string
+     *
      * @ORM\Column(type="string", length=150)
+     *
+     * @Validations\Required
+     * @Validations\MinLength(min=5)
      */
     private $username;
 
     /**
      * @var string
+     *
      * @ORM\Column(type="string", length=150)
+     *
+     * @Validations\Required
+     * @Validations\MinLength(min=3)
      */
     private $firstName;
 
     /**
      * @var string
+     *
      * @ORM\Column(type="string", length=150)
+     *
+     * @Validations\Required
+     * @Validations\MinLength(min=3)
      */
     private $lastName;
 
     /**
      * @var string
+     *
      * @ORM\Column(type="string", length=150)
+     *
+     * @Validations\Required
+     * @Validations\Email
      */
     private $email;
 
     /**
      * @var string
+     *
      * @ORM\Column(type="string", length=150)
+     *
+     * @Validations\Required
+     * @Validations\MinLength(min=8)
      */
     private $password;
 

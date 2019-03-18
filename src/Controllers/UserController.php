@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AlexManno\Drunk\Controllers;
 
 use AlexManno\Drunk\Core\Annotations\Route;
+use AlexManno\Drunk\Core\Services\Validator;
 use AlexManno\Drunk\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Rakit\Validation\Validator;
 use Zend\Diactoros\Response\JsonResponse;
 
 class UserController
@@ -56,13 +56,7 @@ class UserController
     {
         $userData = json_decode((string) $request->getBody(), true);
 
-        $validation = $this->validator->validate($userData, [
-            'username' => 'required|min:4',
-            'firstName' => 'required|min:2',
-            'lastName' => 'required|min:2',
-            'email' => 'required|email',
-            'password' => 'required|min:8',
-        ]);
+        $validation = $this->validator->validateEntity(User::class, $userData);
 
         if ($validation->fails()) {
             return new JsonResponse(
