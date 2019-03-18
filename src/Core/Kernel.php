@@ -100,7 +100,7 @@ class Kernel
                     false
                 );
             },
-            'doctrine_commands' => [
+            'vendor_commands' => [
                 MetadataCommand::class,
                 ResultCommand::class,
                 CreateCommand::class,
@@ -114,7 +114,7 @@ class Kernel
                     },
                     array_merge(
                         $container->get(CommandsDiscovery::class)->getCommands(),
-                        $container->get('doctrine_commands')
+                        $container->get('vendor_commands')
                     )
                 );
             },
@@ -137,7 +137,7 @@ class Kernel
     {
         $dispatcher = \FastRoute\cachedDispatcher($this->container->get(RoutesProvider::class), [
             'cacheFile' => $this->container->get('base_dir') . '/var/cache/routes.cache',
-            'disableCache' => $_SERVER['ENVIRONMENT'] !== 'prod',
+            'disableCache' => $this->container->get('env'),
         ]);
 
         $httpMethod = $request->getMethod();
