@@ -14,9 +14,6 @@ class CommandsDiscovery
     /** @var string */
     private $directory;
 
-    /** @var string */
-    private $rootDir;
-
     /** @var array */
     private $commands = [];
 
@@ -27,11 +24,10 @@ class CommandsDiscovery
      * @param string $directory
      * @param string $rootDir
      */
-    public function __construct(string $namespace, string $directory, string $rootDir)
+    public function __construct(string $namespace, string $directory)
     {
         $this->namespace = $namespace;
         $this->directory = $directory;
-        $this->rootDir = $rootDir;
     }
 
     public function getCommands(): array
@@ -45,9 +41,8 @@ class CommandsDiscovery
 
     private function discoverCommands(): void
     {
-        $path = $this->rootDir . '/src/' . $this->directory;
         $finder = new Finder();
-        $finder->files()->in($path);
+        $finder->files()->in($this->directory);
 
         /** @var \SplFileInfo $file */
         foreach ($finder as $file) {

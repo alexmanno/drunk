@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AlexManno\Drunk\Entity;
 
-use AlexManno\Drunk\Core\Services\Hasher;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -71,7 +70,7 @@ class User
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->email = $email;
-        $this->password = Hasher::encrypt($password);
+        $this->password = password_hash($password, PASSWORD_DEFAULT);
     }
 
     /**

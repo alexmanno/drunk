@@ -11,27 +11,16 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class RouteDiscovery
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $namespace;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $directory;
 
     /**
      * @var Reader
      */
     private $annotationReader;
-
-    /**
-     * The Kernel root directory
-     *
-     * @var string
-     */
-    private $rootDir;
 
     /**
      * @var array
@@ -41,17 +30,15 @@ class RouteDiscovery
     /**
      * RouteDiscovery constructor.
      *
-     * @param        $namespace
-     * @param        $directory
-     * @param        $rootDir
+     * @param string $namespace
+     * @param string $directory
      * @param Reader $annotationReader
      */
-    public function __construct($namespace, $directory, $rootDir, Reader $annotationReader)
+    public function __construct(string $namespace, string $directory, Reader $annotationReader)
     {
         $this->namespace = $namespace;
         $this->annotationReader = $annotationReader;
         $this->directory = $directory;
-        $this->rootDir = $rootDir;
     }
 
     /**
@@ -73,23 +60,21 @@ class RouteDiscovery
      */
     private function discoverRoutes()
     {
-        $path = $this->rootDir . '/src/' . $this->directory;
         $finder = new Finder();
-        $finder->files()->in($path);
+        $finder->files()->in($this->directory);
 
         /** @var SplFileInfo $file */
         foreach ($finder as $file) {
             $class = $this->namespace . '\\' . $file->getBasename('.php');
             $reflectionClass = new \ReflectionClass($class);
             foreach ($reflectionClass->getMethods() as $method) {
-                /** @var Route $annotation */
+                /** @var Route|null $annotation */
                 $annotation = $this->annotationReader->getMethodAnnotation($method, Route::class);
 
-                if (! $annotation) {
+                if (null === $annotation) {
                     continue;
                 }
 
-                /* @var Route $annotation */
                 $this->routes[] = [
                     'class_name' => $class,
                     'class_method' => $method->name,

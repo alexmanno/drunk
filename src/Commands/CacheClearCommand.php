@@ -19,6 +19,7 @@ class CacheClearCommand extends Command
      * CacheClearCommand constructor.
      *
      * @param ContainerInterface $container
+     * @param Filesystem $filesystem
      */
     public function __construct(Filesystem $filesystem)
     {

@@ -59,16 +59,14 @@ class Kernel
             RouteDiscovery::class => function (ContainerInterface $container): RouteDiscovery {
                 return new RouteDiscovery(
                     'AlexManno\\Drunk\\Controllers',
-                    'Controllers',
-                    (string) $container->get('base_dir'),
+                    sprintf('%s/src/Controllers', $container->get('base_dir')),
                     $container->get(AnnotationReader::class)
                 );
             },
             CommandsDiscovery::class => function (ContainerInterface $container): CommandsDiscovery {
                 return new CommandsDiscovery(
                     'AlexManno\\Drunk\\Commands',
-                    'Commands',
-                    (string) $container->get('base_dir')
+                    sprintf('%s/src/Commands', $container->get('base_dir'))
                 );
             },
             EntityManagerInterface::class => function (ContainerInterface $container): EntityManagerInterface {
@@ -94,7 +92,7 @@ class Kernel
             Configuration::class => function (ContainerInterface $container): Configuration {
                 return Setup::createAnnotationMetadataConfiguration(
                     [sprintf('%s/src', $container->get('base_dir'))],
-                    $container->get('env'),
+                    'prod' !== $container->get('env'),
                     null,
                     null,
                     false
