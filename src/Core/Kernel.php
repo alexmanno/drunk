@@ -48,11 +48,19 @@ class Kernel
         $containerBuilder = new ContainerBuilder();
 
         $containerBuilder->addDefinitions([
+            'base_dir' => $baseDir,
+            'env' => env('ENVIRONMENT', 'dev'),
+            'db.driver' => env('DATABASE_DRIVER', 'pdo_mysql'),
+            'db.host' => env('DATABASE_HOST', 'localhost'),
+            'db.user' => env('DATABASE_USERNAME'),
+            'db.password' => env('DATABASE_PASSWORD'),
+            'db.dbname' => env('DATABASE_DBNAME'),
+
             RouteDiscovery::class => function (ContainerInterface $container): RouteDiscovery {
                 return new RouteDiscovery(
                     'AlexManno\\Drunk\\Controllers',
                     'Controllers',
-                    (string)$container->get('base_dir'),
+                    (string) $container->get('base_dir'),
                     $container->get(AnnotationReader::class)
                 );
             },
@@ -60,7 +68,7 @@ class Kernel
                 return new CommandsDiscovery(
                     'AlexManno\\Drunk\\Commands',
                     'Commands',
-                    (string)$container->get('base_dir')
+                    (string) $container->get('base_dir')
                 );
             },
             EntityManagerInterface::class => function (ContainerInterface $container): EntityManagerInterface {
@@ -86,7 +94,7 @@ class Kernel
             Configuration::class => function (ContainerInterface $container): Configuration {
                 return Setup::createAnnotationMetadataConfiguration(
                     [sprintf('%s/src', $container->get('base_dir'))],
-                    $container->get('env') ?? 'prod',
+                    $container->get('env'),
                     null,
                     null,
                     false
@@ -113,14 +121,6 @@ class Kernel
         ]);
 
         $this->container = $containerBuilder->build();
-        $this->container->set('base_dir', $baseDir);
-        $this->container->set('env', env('ENVIRONMENT', 'prod'));
-
-        $this->container->set('db.driver', env('DATABASE_DRIVER', 'pdo_mysql'));
-        $this->container->set('db.host', env('DATABASE_HOST', 'localhost'));
-        $this->container->set('db.user', env('DATABASE_USERNAME'));
-        $this->container->set('db.password', env('DATABASE_PASSWORD'));
-        $this->container->set('db.dbname', env('DATABASE_DBNAME'));
 
         $this->container->set(Kernel::class, $this);
     }

@@ -53,6 +53,7 @@ class User
 
     /**
      * User constructor.
+     *
      * @param string $username
      * @param string $firstName
      * @param string $lastName
@@ -65,8 +66,7 @@ class User
         string $lastName,
         string $email,
         string $password
-    )
-    {
+    ) {
         $this->username = $username;
         $this->firstName = $firstName;
         $this->lastName = $lastName;
