@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexManno\Drunk\Entity;
 
+use AlexManno\Drunk\Core\Services\Hasher;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -70,7 +71,23 @@ class User
         $this->firstMame = $firstMame;
         $this->lastName = $lastName;
         $this->email = $email;
-        $this->password = $password;
+        $this->password = Hasher::encrypt($password);
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return User
+     */
+    public static function fromArray(array $data): User
+    {
+        return new User(
+            $data['username'],
+            $data['firstName'],
+            $data['lastName'],
+            $data['email'],
+            $data['password']
+        );
     }
 
     /**
