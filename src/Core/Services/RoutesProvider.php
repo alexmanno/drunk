@@ -28,7 +28,14 @@ class RoutesProvider
     {
         $routes = $this->discovery->getRoutes();
         foreach ($routes as $route) {
-            $r->addRoute($route['route_method'], $route['route'], [$route['class_name'], $route['class_method']]);
+            $r->addRoute(
+                $route->getRouteMethod(),
+                $route->getRoute(),
+                [
+                    $route->getClassName(),
+                    $route->getClassMethod(),
+                ]
+            );
         }
     }
 }

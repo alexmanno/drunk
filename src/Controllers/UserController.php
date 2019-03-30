@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace AlexManno\Drunk\Controllers;
 
 use AlexManno\Drunk\Core\Annotations\Route;
+use AlexManno\Drunk\Core\Annotations\RouteGroup;
 use AlexManno\Drunk\Core\Services\Validator;
 use AlexManno\Drunk\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response\JsonResponse;
 
+/**
+ * Class UserController
+ *
+ * @RouteGroup(prefix="/api")
+ */
 class UserController
 {
     /** @var EntityManagerInterface */

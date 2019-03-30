@@ -45,10 +45,16 @@ class Route
     }
 
     /**
+     * @param ?string $prefix
+     *
      * @return string
      */
-    public function getRoute(): string
+    public function getRoute(?string $prefix = null): string
     {
-        return $this->route;
+        if (null === $prefix) {
+            return $this->route;
+        }
+
+        return str_replace('//', '/', sprintf('%s/%s', $prefix, $this->route));
     }
 }

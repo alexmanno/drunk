@@ -31,7 +31,7 @@ return [
     Dispatcher::class => function (ContainerInterface $container): Dispatcher {
         return \FastRoute\cachedDispatcher($container->get(RoutesProvider::class), [
             'cacheFile' => $container->get('base_dir') . '/var/cache/routes.cache',
-            'disableCache' => $container->get('env'),
+            'disableCache' => $container->get('env') === 'dev',
         ]);
     },
     Application::class => function (ContainerInterface $container): Application {

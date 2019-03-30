@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AlexManno\Drunk\Core\Services;
 
 use AlexManno\Drunk\Core\Annotations\Route;
+use AlexManno\Drunk\Core\Annotations\RouteGroup;
+use AlexManno\Drunk\Core\Models\Route as RouteModel;
 use Doctrine\Common\Annotations\Reader;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -44,7 +46,7 @@ class RouteDiscovery
     /**
      * @throws \ReflectionException
      *
-     * @return array
+     * @return array|RouteModel[]
      */
     public function getRoutes(): array
     {
@@ -67,6 +69,15 @@ class RouteDiscovery
         foreach ($finder as $file) {
             $class = $this->namespace . '\\' . $file->getBasename('.php');
             $reflectionClass = new \ReflectionClass($class);
+
+            /** @var RouteGroup $routeGroupAnnotation */
+            $routeGroupAnnotation = $this->annotationReader->getClassAnnotation($reflectionClass, RouteGroup::class);
+
+            $prefix = null;
+            if (null !== $routeGroupAnnotation) {
+                $prefix = $routeGroupAnnotation->getPrefix();
+            }
+
             foreach ($reflectionClass->getMethods() as $method) {
                 /** @var Route|null $annotation */
                 $annotation = $this->annotationReader->getMethodAnnotation($method, Route::class);
@@ -75,12 +86,12 @@ class RouteDiscovery
                     continue;
                 }
 
-                $this->routes[] = [
-                    'class_name' => $class,
-                    'class_method' => $method->name,
-                    'route' => $annotation->getRoute(),
-                    'route_method' => $annotation->getMethod(),
-                ];
+                $this->routes[] = new RouteModel(
+                    $class,
+                    $method->name,
+                    $annotation->getRoute($prefix),
+                    $annotation->getMethod()
+                );
             }
         }
     }
