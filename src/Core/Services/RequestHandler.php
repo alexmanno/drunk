@@ -56,7 +56,7 @@ class RequestHandler
 
                 $controller = $this->container->get($handler[0]);
 
-                return $controller->{$handler[1]}($request, ...$vars);
+                return $controller->{$handler[1]}($request, $vars);
 
                 break;
         }

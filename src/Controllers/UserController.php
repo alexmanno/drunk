@@ -62,7 +62,7 @@ class UserController
     {
         $userData = json_decode((string) $request->getBody(), true);
 
-        $validation = $this->validator->validateEntity(User::class, $userData);
+        $validation = $this->validator->validateEntity(User::class, $userData ?? []);
 
         if ($validation->fails()) {
             return new JsonResponse(
@@ -79,5 +79,25 @@ class UserController
         return new JsonResponse([
             'id' => $user->getId(),
         ], 201);
+    }
+
+    /**
+     * @Route(route="/users/{id}", method="GET")
+     *
+     * @param ServerRequestInterface $request
+     * @param array                  $args
+     *
+     * @return JsonResponse
+     */
+    public function get(ServerRequestInterface $request, array $args): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->entityManager->find(User::class, (int) $args['id']);
+
+        if (null === $user) {
+            return new JsonResponse(['error' => 'User not found.'], 404);
+        }
+
+        return new JsonResponse($user->toArray());
     }
 }
