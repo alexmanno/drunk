@@ -16,6 +16,11 @@ cd /app
 composer install
 ```
 
+Dump sql
+```sh
+bin/console orm:schema-tool:create
+```
+
 # Usage
 
 ### Retrive all users
