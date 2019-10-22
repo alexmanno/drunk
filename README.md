@@ -23,7 +23,7 @@ bin/console orm:schema-tool:create
 
 # Usage
 
-### Retrive all users
+### Retrieve all users
 ```sh
 curl http://localhost:8080/api/users
 ```
