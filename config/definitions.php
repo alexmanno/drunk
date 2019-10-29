@@ -42,6 +42,9 @@ return [
         $application->setHelperSet($container->get(HelperSet::class));
         $application->addCommands($container->get('commands'));
 
+        // Register doctrine commands
+        ConsoleRunner::addCommands($application);
+
         return $application;
     },
     RouteDiscovery::class => function (ContainerInterface $container): RouteDiscovery {
@@ -88,22 +91,12 @@ return [
             false
         );
     },
-    'vendor_commands' => [
-        MetadataCommand::class,
-        ResultCommand::class,
-        CreateCommand::class,
-        UpdateCommand::class,
-        DropCommand::class,
-    ],
     'commands' => function (ContainerInterface $container): array {
         return array_map(
             function (string $command) use ($container): Command {
                 return $container->get($command);
             },
-            array_merge(
-                $container->get(CommandsDiscovery::class)->getCommands(),
-                $container->get('vendor_commands')
-            )
+            $container->get(CommandsDiscovery::class)->getCommands()
         );
     },
 ];
